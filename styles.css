@@ -44,10 +44,41 @@
 	margin-bottom: var(--size-4-2);
 }
 
+.prd-test-stepper {
+	display: flex;
+	align-items: stretch;
+	flex: 0 0 auto;
+}
+
+.prd-test-step-button {
+	flex: 0 0 auto;
+	width: 2em;
+	padding: 0;
+}
+
+.prd-test-stepper .prd-test-step-button:first-child {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.prd-test-stepper .prd-test-step-button:last-child {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
 .prd-test-input {
-	width: 4.5em;
+	width: 3.5em;
 	flex: 0 0 auto;
 	text-align: center;
+	border-radius: 0;
+	border-left: none;
+	border-right: none;
+}
+
+.prd-test-input::-webkit-inner-spin-button,
+.prd-test-input::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 .prd-test-button {

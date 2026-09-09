@@ -83,6 +83,12 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		this.testModifierInput = value;
 	}
 
+	stepTestModifier(delta: number) {
+		const current = Number(this.testModifierInput) || 0;
+		this.testModifierInput = String(current + delta);
+		this.refreshView();
+	}
+
 	async rollTest() {
 		const modifier = Number(this.testModifierInput) || 0;
 		const mode = this.rollMode;

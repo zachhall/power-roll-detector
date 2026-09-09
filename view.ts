@@ -62,7 +62,18 @@ export class PowerRollView extends ItemView {
 		}
 
 		const testRow = contentEl.createDiv({ cls: "prd-test-row" });
-		const testInput = testRow.createEl("input", {
+
+		const stepper = testRow.createDiv({ cls: "prd-test-stepper" });
+		const decrementButton = stepper.createEl("button", {
+			text: "−",
+			cls: "prd-test-step-button",
+			attr: { "aria-label": "Decrease test modifier" },
+		});
+		decrementButton.addEventListener("click", () => {
+			this.plugin.stepTestModifier(-1);
+		});
+
+		const testInput = stepper.createEl("input", {
 			type: "number",
 			cls: "prd-test-input",
 			attr: { placeholder: "0", "aria-label": "Test modifier" },
@@ -71,6 +82,16 @@ export class PowerRollView extends ItemView {
 		testInput.addEventListener("input", () => {
 			this.plugin.setTestModifierInput(testInput.value);
 		});
+
+		const incrementButton = stepper.createEl("button", {
+			text: "+",
+			cls: "prd-test-step-button",
+			attr: { "aria-label": "Increase test modifier" },
+		});
+		incrementButton.addEventListener("click", () => {
+			this.plugin.stepTestModifier(1);
+		});
+
 		const testButton = testRow.createEl("button", {
 			text: "Roll a Test",
 			cls: "prd-test-button",
