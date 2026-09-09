@@ -1,0 +1,14 @@
+.power-roll-inline {
+	cursor: pointer;
+	border-radius: 4px;
+	padding: 0 2px;
+	text-decoration: underline dotted;
+	text-decoration-color: var(--text-accent);
+	transition: background-color 0.1s ease-in-out;
+}
+
+.power-roll-inline:hover,
+.power-roll-inline:focus-visible {
+	background-color: var(--text-selection);
+	outline: none;
+}
