@@ -96,16 +96,22 @@
 	border: 1px solid currentColor;
 }
 
-.prd-tier-badge.prd-tier-1,
+.prd-tier-badge.prd-tier-1 {
+	color: #a6743d; /* bronze */
+}
+
+.prd-tier-badge.prd-tier-2 {
+	color: #8a8f98; /* silver */
+}
+
+.prd-tier-badge.prd-tier-3 {
+	color: #b8901f; /* gold */
+}
+
 .prd-tier-badge.prd-failure {
 	color: var(--color-red);
 }
 
-.prd-tier-badge.prd-tier-2 {
-	color: var(--color-orange);
-}
-
-.prd-tier-badge.prd-tier-3,
 .prd-tier-badge.prd-success {
 	color: var(--color-green);
 }
