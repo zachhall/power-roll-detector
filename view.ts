@@ -62,7 +62,7 @@ export class PowerRollView extends ItemView {
 		}
 
 		const savingThrowButton = contentEl.createEl("button", {
-			text: "Saving Throw",
+			text: "Roll a Saving Throw",
 			cls: "prd-saving-throw-button",
 		});
 		savingThrowButton.addEventListener("click", () => {
