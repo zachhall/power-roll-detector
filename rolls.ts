@@ -101,6 +101,10 @@ function signedTerm(value: number): string {
 	return `${value >= 0 ? "+" : "-"} ${Math.abs(value)}`;
 }
 
+export function isNaturalCrit(entry: RollHistoryEntry): boolean {
+	return entry.dieB !== null && entry.dieA + entry.dieB >= 19;
+}
+
 export function rollBreakdown(entry: RollHistoryEntry): string {
 	const terms: string[] = [`🎲 ${entry.dieA}`];
 

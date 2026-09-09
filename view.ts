@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import type PowerRollDetectorPlugin from "./main";
-import { RollHistoryEntry, RollMode, rollBreakdown, rollSuffix, tierLabel } from "./rolls";
+import { RollHistoryEntry, RollMode, isNaturalCrit, rollBreakdown, rollSuffix, tierLabel } from "./rolls";
 
 export const VIEW_TYPE_POWER_ROLL = "power-roll-history-view";
 
@@ -139,6 +139,9 @@ export class PowerRollView extends ItemView {
 	private buildHistoryRow(entry: RollHistoryEntry): HTMLElement {
 		const row = document.createElement("div");
 		row.addClass("prd-history-entry");
+		if (isNaturalCrit(entry)) {
+			row.addClass("prd-history-natural");
+		}
 
 		if (entry.creatureLabel) {
 			row.createDiv({ text: entry.creatureLabel, cls: "prd-history-creature" });

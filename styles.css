@@ -118,6 +118,11 @@
 	padding: var(--size-4-2);
 }
 
+.prd-history-entry.prd-history-natural {
+	border: 2px solid #b8901f; /* gold, matches the Tier 3 badge */
+	padding: calc(var(--size-4-2) - 1px);
+}
+
 .prd-history-creature {
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
