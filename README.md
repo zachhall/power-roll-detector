@@ -20,28 +20,32 @@ Inspired by [RPG Detect Dice Roll](https://www.solorpgstudio.com) by solorpgstud
   - Rolls two independent d10s and sums them with the modifier.
   - Applies whichever Edge/Bane mode is currently armed in the sidebar (see below), then clears it.
   - Classifies the total into Draw Steel's power roll tiers (≤11 / 12–16 / 17+).
-  - Shows the result in a toast notice, e.g. `Power Roll + 2 → 🎲 6 + 9 + 2 = 17 (Tier 3: 17+)`.
+  - Shows the result in a toast notice, with each term broken out separately, e.g. `Power Roll + 2 (Edge): 🎲 6 + 9 + 2 + 2 = 19 (Tier 3: 17+)`.
   - If the roll happened inside a Draw Steel Elements ability block, the ability's name (e.g. "I Work Better Alone") and the containing monster/character's name (e.g. "Ghost") are both captured and shown alongside the roll in history.
 
 ### Power Roll sidebar
 
 A ribbon icon (🎲, "Open Power Roll history") opens a sidebar view with:
 
-- **Edge/Bane toggles** — Bane, Double Bane, Edge, Double Edge, laid out as two paired rows (Bane/Edge, then Double Bane/Double Edge) so each pair's buttons match in size. Click one to arm it for the *next* Power Roll click only; it auto-clears once applied (click again to disarm manually). Only one can be armed at a time. Per Draw Steel's rules:
+- **Edge/Bane toggles** — Bane, Double Bane, Edge, Double Edge, laid out as two paired rows (Bane/Edge, then Double Bane/Double Edge) so each pair's buttons match in size. Click one to arm it for the *next* Power Roll or Test click only; it auto-clears once applied (click again to disarm manually). Only one can be armed at a time. Per Draw Steel's rules:
   - Edge: +2 to the roll.
   - Double Edge: no numeric bonus — the resulting tier is bumped up by one (capped at Tier 3).
   - Bane: −2 to the roll.
   - Double Bane: no numeric penalty — the resulting tier is dropped by one (floored at Tier 1).
-- **"Roll a Saving Throw" button** — a flat, unmodified 1d10 roll (success on 6+, failure on 5 or lower). Always ignores the Edge/Bane toggle, matching Draw Steel's rules that edges/banes apply to power rolls specifically.
-- **Roll history** — the most recent 20 rolls (power rolls and saving throws), newest first. Each entry shows, top to bottom: the monster/character name (small, muted), the ability/Feature name (bold), a large result total with a color-coded outlined tier badge (bronze/silver/gold for Tier 1/2/3, or green/red for saving throw success/failure), the dice/modifier breakdown in smaller muted text, and a timestamp. Persists across Obsidian restarts.
+- **Test modifier input + "Roll a Test" button** — a `2d10 + N` roll for Draw Steel Tests (characteristic checks, skill checks, negotiation arguments, etc.), which also use Draw Steel's Tiered Outcomes but reference a characteristic score the plugin has no way to read off a character sheet. Type (or use the `−`/`+` stepper) the modifier yourself, then roll. Respects and consumes the Edge/Bane toggle exactly like a Power Roll.
+- **"Use Skill" toggle** — next to Roll a Test. Adds a flat +2 to the *next* Test only, then auto-clears, the same way Edge/Bane do. Stacks independently with an armed Edge/Bane toggle (e.g. Edge + Use Skill both active shows up as `(Edge, Skill)` and adds both bonuses).
+- A divider separates the toggle-affected buttons above from:
+- **"Roll a Saving Throw" button** — a flat, unmodified 1d10 roll (success on 6+, failure on 5 or lower). Always ignores the Edge/Bane toggle and Use Skill, matching Draw Steel's rules that edges/banes/skills apply to power rolls and Tests, not saving throws.
+- **Roll history** — the most recent 20 rolls (Power Rolls, Tests, and Saving Throws), newest first. Each entry shows, top to bottom: the monster/character name (small, muted, Power Roll only), the ability/Feature name (bold, Power Roll only), a large result total with a color-coded outlined tier badge (bronze/silver/gold for Tier 1/2/3, or green/red for saving throw success/failure), a dice breakdown in smaller muted text with every term shown separately (dice + characteristic + edge/bane + skill), and a timestamp. A roll whose raw two dice sum to a **natural 19 or 20** (before any modifiers) gets a gold border around its entire history card, since that's always significant in Draw Steel regardless of what's added afterward. Persists across Obsidian restarts.
 
 ## What it intentionally doesn't do (yet)
 
 - No Live Preview / editing-mode support — detection only runs in Reading view (via `registerMarkdownPostProcessor`).
 - No settings pane (history limit, tier bands, badge colors, etc. are fixed).
 - Ability-check variants like `Power Roll + Reason, Intuition, or Presence` are left alone — only the numeric-modifier form is matched.
-- Ability-name context relies on Draw Steel Elements' `.ds-feature-container` / `.ds-feature-name-value` DOM structure; rolls outside that structure (plain prose, other renderers) are logged without a Feature label.
-- Monster/character-name context relies on Draw Steel Elements' `.ds-sb-container` / `.ds-header-title-left` DOM structure (i.e. a `ds-statblock` block). Character sheets built from loose components instead of a single `ds-statblock` (no statblock wrapper in the rendered DOM) fall back to the note's filename.
+- Ability-name context relies on Draw Steel Elements' `.ds-feature-container` / `.ds-feature-name-value` DOM structure; rolls outside that structure (plain prose, other renderers, and Test/Saving Throw rolls, which are toolbar actions rather than detected text) are logged without a Feature label.
+- Monster/character-name context relies on Draw Steel Elements' `.ds-sb-container` / `.ds-header-title-left` DOM structure (i.e. a `ds-statblock` block). Character sheets built from loose components instead of a single `ds-statblock` (no statblock wrapper in the rendered DOM) fall back to the note's filename. Test/Saving Throw rolls never have this context, for the same toolbar-action reason as above.
+- No difficulty selector or success/failure classification for Tests — Draw Steel's difficulty bands (easy/medium/hard) shift what each tier outcome means, and the plugin has no way to know which applies, so it just shows the raw total and tier for you to read against whatever table applies at the table.
 
 ## Installation
 
@@ -80,6 +84,8 @@ npm run build  # one-off production build (minified)
 - Rolling uses `Math.random()` — this is a tabletop utility, not a cryptographic context.
 - Roll history and the sidebar's `ItemView` (`view.ts`) are separate from the pure dice/tier math (`rolls.ts`), which has no DOM or Obsidian API dependency.
 - History is persisted via Obsidian's standard `loadData()`/`saveData()` plugin-data API (`data.json`), capped at the most recent 20 entries.
+- `rollBreakdown()` in `rolls.ts` builds the term-by-term dice text (dice + characteristic + edge/bane + skill) shared by both the Notice toast and the history entry, so the two never drift out of sync; `rollSuffix()` similarly builds the shared `(Edge, Skill)`-style annotation.
+- `isNaturalCrit()` flags an entry for the gold-border treatment by checking `dieA + dieB >= 19` — deliberately before any modifier is added, per the rule that a natural 19/20 is always significant regardless of what's added afterward.
 
 ## License
 
