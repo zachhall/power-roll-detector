@@ -10,6 +10,7 @@ export interface RollHistoryEntry {
 	creatureLabel: string | null;
 	formulaText: string;
 	mode: RollMode | null;
+	skillApplied: boolean;
 	dieA: number;
 	dieB: number | null;
 	modifier: number | null;
@@ -87,6 +88,13 @@ export function modeLabel(mode: RollMode): string {
 		default:
 			return "";
 	}
+}
+
+export function rollSuffix(mode: RollMode | null, skillApplied: boolean): string {
+	const parts: string[] = [];
+	if (mode && mode !== "none") parts.push(modeLabel(mode));
+	if (skillApplied) parts.push("Skill");
+	return parts.length ? ` (${parts.join(", ")})` : "";
 }
 
 export function makeEntryId(): string {

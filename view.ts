@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import type PowerRollDetectorPlugin from "./main";
-import { RollHistoryEntry, RollMode, modeLabel, tierLabel } from "./rolls";
+import { RollHistoryEntry, RollMode, rollSuffix, tierLabel } from "./rolls";
 
 export const VIEW_TYPE_POWER_ROLL = "power-roll-history-view";
 
@@ -100,6 +100,17 @@ export class PowerRollView extends ItemView {
 			this.plugin.rollTest();
 		});
 
+		const skillButton = testRow.createEl("button", {
+			text: "Use Skill",
+			cls: "prd-skill-button",
+		});
+		if (this.plugin.skillEnabled) {
+			skillButton.addClass("is-active");
+		}
+		skillButton.addEventListener("click", () => {
+			this.plugin.toggleSkill();
+		});
+
 		contentEl.createDiv({ cls: "prd-divider" });
 
 		const savingThrowButton = contentEl.createEl("button", {
@@ -149,13 +160,13 @@ export class PowerRollView extends ItemView {
 				});
 			}
 
-			const modeSuffix = entry.mode && entry.mode !== "none" ? ` (${modeLabel(entry.mode)})` : "";
+			const suffix = rollSuffix(entry.mode, entry.skillApplied);
 			const dice = `🎲 ${entry.dieA} + ${entry.dieB}`;
 			const modifierText =
 				entry.modifier !== null
 					? ` ${entry.modifier >= 0 ? "+ " : "- "}${Math.abs(entry.modifier)}`
 					: "";
-			breakdown.setText(`${entry.formulaText}${modeSuffix}: ${dice}${modifierText}`);
+			breakdown.setText(`${entry.formulaText}${suffix}: ${dice}${modifierText}`);
 		} else {
 			resultRow.createSpan({ text: String(entry.dieA), cls: "prd-result-total" });
 			resultRow.createSpan({

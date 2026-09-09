@@ -81,8 +81,14 @@
 	margin: 0;
 }
 
-.prd-test-button {
-	flex: 1 1 auto;
+.prd-test-button,
+.prd-skill-button {
+	flex: 1 1 0;
+}
+
+.prd-skill-button.is-active {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
 }
 
 .prd-divider {

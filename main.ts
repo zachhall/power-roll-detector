@@ -4,9 +4,9 @@ import {
 	RollHistoryEntry,
 	RollMode,
 	makeEntryId,
-	modeLabel,
 	rollPowerRoll,
 	rollSavingThrow as rollSavingThrowResult,
+	rollSuffix,
 	tierLabel,
 } from "./rolls";
 
@@ -27,6 +27,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 	rollMode: RollMode = "none";
 	history: RollHistoryEntry[] = [];
 	testModifierInput = "";
+	skillEnabled = false;
 
 	async onload() {
 		const data = (await this.loadData()) as PluginData | null;
@@ -89,8 +90,15 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		this.refreshView();
 	}
 
+	toggleSkill() {
+		this.skillEnabled = !this.skillEnabled;
+		this.refreshView();
+	}
+
 	async rollTest() {
-		const modifier = Number(this.testModifierInput) || 0;
+		const typedModifier = Number(this.testModifierInput) || 0;
+		const skillApplied = this.skillEnabled;
+		const modifier = typedModifier + (skillApplied ? 2 : 0);
 		const mode = this.rollMode;
 		const result = rollPowerRoll(modifier, mode);
 
@@ -102,6 +110,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			creatureLabel: null,
 			formulaText: "Test",
 			mode,
+			skillApplied,
 			dieA: result.dieA,
 			dieB: result.dieB,
 			modifier,
@@ -113,13 +122,16 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		if (mode !== "none") {
 			this.rollMode = "none";
 		}
+		if (skillApplied) {
+			this.skillEnabled = false;
+		}
 
 		await this.pushHistory(entry);
 
-		const modeSuffix = mode !== "none" ? ` (${modeLabel(mode)})` : "";
+		const suffix = rollSuffix(mode, skillApplied);
 		const sign = modifier >= 0 ? "+ " : "- ";
 		new Notice(
-			`Test${modeSuffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
+			`Test${suffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
 			6000
 		);
 	}
@@ -134,6 +146,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			creatureLabel: null,
 			formulaText: "Saving Throw",
 			mode: null,
+			skillApplied: false,
 			dieA: result.die,
 			dieB: null,
 			modifier: null,
@@ -182,6 +195,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			creatureLabel,
 			formulaText: span.textContent ?? "Power Roll",
 			mode,
+			skillApplied: false,
 			dieA: result.dieA,
 			dieB: result.dieB,
 			modifier,
@@ -196,10 +210,10 @@ export default class PowerRollDetectorPlugin extends Plugin {
 
 		await this.pushHistory(entry);
 
-		const modeSuffix = mode !== "none" ? ` (${modeLabel(mode)})` : "";
+		const suffix = rollSuffix(mode, false);
 		const sign = modifier >= 0 ? "+ " : "- ";
 		new Notice(
-			`${entry.formulaText}${modeSuffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
+			`${entry.formulaText}${suffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
 			6000
 		);
 	}
