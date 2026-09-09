@@ -45,11 +45,21 @@ A ribbon icon (🎲, "Open Power Roll history") opens a sidebar view with:
 
 ## Installation
 
-Not yet on the Obsidian community plugin registry. To install manually:
+### Recommended: BRAT
+
+Install via [BRAT](https://github.com/TfTHacker/obsidian42-brat) (Beta Reviewers Auto-update Tool), which handles fetching releases and checking for updates for you:
+
+1. Install and enable the **BRAT** community plugin (Settings → Community plugins → Browse).
+2. Open BRAT's settings (or run the command **BRAT: Add a beta plugin for testing**) and add this repo: `zachhall/power-roll-detector`.
+3. BRAT downloads `main.js`, `manifest.json`, and `styles.css` from the latest [release](../../releases) and enables the plugin automatically. Future releases can be pulled in via **BRAT: Check for updates to all beta plugins**.
+
+### Manual installation
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from a [release](../../releases) (or build from source, below).
 2. Copy them into `<your vault>/.obsidian/plugins/power-roll-detector/`.
 3. Reload Obsidian and enable **Power Roll Detector** under Settings → Community plugins.
+
+With this method you're responsible for repeating these steps yourself for future updates — BRAT does this for you.
 
 ## Building from source
 
