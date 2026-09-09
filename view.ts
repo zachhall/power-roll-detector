@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import type PowerRollDetectorPlugin from "./main";
-import { RollHistoryEntry, RollMode, rollSuffix, tierLabel } from "./rolls";
+import { RollHistoryEntry, RollMode, rollBreakdown, rollSuffix, tierLabel } from "./rolls";
 
 export const VIEW_TYPE_POWER_ROLL = "power-roll-history-view";
 
@@ -161,12 +161,7 @@ export class PowerRollView extends ItemView {
 			}
 
 			const suffix = rollSuffix(entry.mode, entry.skillApplied);
-			const dice = `🎲 ${entry.dieA} + ${entry.dieB}`;
-			const modifierText =
-				entry.modifier !== null
-					? ` ${entry.modifier >= 0 ? "+ " : "- "}${Math.abs(entry.modifier)}`
-					: "";
-			breakdown.setText(`${entry.formulaText}${suffix}: ${dice}${modifierText}`);
+			breakdown.setText(`${entry.formulaText}${suffix}: ${rollBreakdown(entry)}`);
 		} else {
 			resultRow.createSpan({ text: String(entry.dieA), cls: "prd-result-total" });
 			resultRow.createSpan({

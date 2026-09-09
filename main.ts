@@ -4,6 +4,7 @@ import {
 	RollHistoryEntry,
 	RollMode,
 	makeEntryId,
+	rollBreakdown,
 	rollPowerRoll,
 	rollSavingThrow as rollSavingThrowResult,
 	rollSuffix,
@@ -96,11 +97,11 @@ export default class PowerRollDetectorPlugin extends Plugin {
 	}
 
 	async rollTest() {
-		const typedModifier = Number(this.testModifierInput) || 0;
+		const characteristicModifier = Number(this.testModifierInput) || 0;
 		const skillApplied = this.skillEnabled;
-		const modifier = typedModifier + (skillApplied ? 2 : 0);
+		const effectiveModifier = characteristicModifier + (skillApplied ? 2 : 0);
 		const mode = this.rollMode;
-		const result = rollPowerRoll(modifier, mode);
+		const result = rollPowerRoll(effectiveModifier, mode);
 
 		const entry: RollHistoryEntry = {
 			id: makeEntryId(),
@@ -113,7 +114,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			skillApplied,
 			dieA: result.dieA,
 			dieB: result.dieB,
-			modifier,
+			modifier: characteristicModifier,
 			total: result.total,
 			tier: result.tier,
 			success: null,
@@ -129,9 +130,8 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		await this.pushHistory(entry);
 
 		const suffix = rollSuffix(mode, skillApplied);
-		const sign = modifier >= 0 ? "+ " : "- ";
 		new Notice(
-			`Test${suffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
+			`Test${suffix}: ${rollBreakdown(entry)} = ${result.total} (${tierLabel(result.tier)})`,
 			6000
 		);
 	}
@@ -211,9 +211,8 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		await this.pushHistory(entry);
 
 		const suffix = rollSuffix(mode, false);
-		const sign = modifier >= 0 ? "+ " : "- ";
 		new Notice(
-			`${entry.formulaText}${suffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
+			`${entry.formulaText}${suffix}: ${rollBreakdown(entry)} = ${result.total} (${tierLabel(result.tier)})`,
 			6000
 		);
 	}

@@ -97,6 +97,31 @@ export function rollSuffix(mode: RollMode | null, skillApplied: boolean): string
 	return parts.length ? ` (${parts.join(", ")})` : "";
 }
 
+function signedTerm(value: number): string {
+	return `${value >= 0 ? "+" : "-"} ${Math.abs(value)}`;
+}
+
+export function rollBreakdown(entry: RollHistoryEntry): string {
+	const terms: string[] = [`🎲 ${entry.dieA}`];
+
+	if (entry.dieB !== null) {
+		terms.push(`+ ${entry.dieB}`);
+	}
+	if (entry.modifier !== null) {
+		terms.push(signedTerm(entry.modifier));
+	}
+	if (entry.mode === "edge") {
+		terms.push(signedTerm(2));
+	} else if (entry.mode === "bane") {
+		terms.push(signedTerm(-2));
+	}
+	if (entry.skillApplied) {
+		terms.push(signedTerm(2));
+	}
+
+	return terms.join(" ");
+}
+
 export function makeEntryId(): string {
 	return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
