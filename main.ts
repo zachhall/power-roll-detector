@@ -131,9 +131,9 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		await this.pushHistory(entry);
 
 		const modeSuffix = mode !== "none" ? ` (${modeLabel(mode)})` : "";
-		const sign = modifier >= 0 ? "+" : "";
+		const sign = modifier >= 0 ? "+ " : "- ";
 		new Notice(
-			`${entry.formulaText}${modeSuffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${modifier} = ${result.total} (${tierLabel(result.tier)})`,
+			`${entry.formulaText}${modeSuffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
 			6000
 		);
 	}

@@ -92,7 +92,7 @@ export class PowerRollView extends ItemView {
 			const dice = `🎲 ${entry.dieA} + ${entry.dieB}`;
 			const modifierText =
 				entry.modifier !== null
-					? ` ${entry.modifier >= 0 ? "+" : ""}${entry.modifier}`
+					? ` ${entry.modifier >= 0 ? "+ " : "- "}${Math.abs(entry.modifier)}`
 					: "";
 			line.setText(
 				`${entry.formulaText}${modeSuffix}: ${dice}${modifierText} = ${entry.total} — ${
