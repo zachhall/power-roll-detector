@@ -4,11 +4,15 @@ import { RollHistoryEntry, RollMode, modeLabel, tierLabel } from "./rolls";
 
 export const VIEW_TYPE_POWER_ROLL = "power-roll-history-view";
 
-const TOGGLE_MODES: { mode: RollMode; label: string }[] = [
-	{ mode: "bane", label: "Bane" },
-	{ mode: "doubleBane", label: "Double Bane" },
-	{ mode: "edge", label: "Edge" },
-	{ mode: "doubleEdge", label: "Double Edge" },
+const TOGGLE_ROWS: { mode: RollMode; label: string }[][] = [
+	[
+		{ mode: "bane", label: "Bane" },
+		{ mode: "edge", label: "Edge" },
+	],
+	[
+		{ mode: "doubleBane", label: "Double Bane" },
+		{ mode: "doubleEdge", label: "Double Edge" },
+	],
 ];
 
 export class PowerRollView extends ItemView {
@@ -40,18 +44,21 @@ export class PowerRollView extends ItemView {
 		contentEl.empty();
 		contentEl.addClass("prd-view");
 
-		const toggleRow = contentEl.createDiv({ cls: "prd-toggle-row" });
-		for (const { mode, label } of TOGGLE_MODES) {
-			const button = toggleRow.createEl("button", {
-				text: label,
-				cls: "prd-toggle-button",
-			});
-			if (this.plugin.rollMode === mode) {
-				button.addClass("is-active");
+		const toggleGrid = contentEl.createDiv({ cls: "prd-toggle-grid" });
+		for (const pair of TOGGLE_ROWS) {
+			const toggleRow = toggleGrid.createDiv({ cls: "prd-toggle-row" });
+			for (const { mode, label } of pair) {
+				const button = toggleRow.createEl("button", {
+					text: label,
+					cls: "prd-toggle-button",
+				});
+				if (this.plugin.rollMode === mode) {
+					button.addClass("is-active");
+				}
+				button.addEventListener("click", () => {
+					this.plugin.setRollMode(mode);
+				});
 			}
-			button.addEventListener("click", () => {
-				this.plugin.setRollMode(mode);
-			});
 		}
 
 		const savingThrowButton = contentEl.createEl("button", {

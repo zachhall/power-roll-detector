@@ -17,15 +17,20 @@
 	padding: var(--size-4-2);
 }
 
-.prd-toggle-row {
+.prd-toggle-grid {
 	display: flex;
-	flex-wrap: wrap;
+	flex-direction: column;
 	gap: var(--size-2-2);
 	margin-bottom: var(--size-4-2);
 }
 
+.prd-toggle-row {
+	display: flex;
+	gap: var(--size-2-2);
+}
+
 .prd-toggle-button {
-	flex: 1 1 auto;
+	flex: 1 1 0;
 }
 
 .prd-toggle-button.is-active {
