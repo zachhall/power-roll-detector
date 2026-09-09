@@ -84,21 +84,22 @@
 	padding: var(--size-2-1) var(--size-2-2);
 	border-radius: 999px;
 	white-space: nowrap;
-	color: var(--text-on-accent);
+	background-color: transparent;
+	border: 1px solid currentColor;
 }
 
 .prd-tier-badge.prd-tier-1,
 .prd-tier-badge.prd-failure {
-	background-color: var(--color-red);
+	color: var(--color-red);
 }
 
 .prd-tier-badge.prd-tier-2 {
-	background-color: var(--color-orange);
+	color: var(--color-orange);
 }
 
 .prd-tier-badge.prd-tier-3,
 .prd-tier-badge.prd-success {
-	background-color: var(--color-green);
+	color: var(--color-green);
 }
 
 .prd-history-breakdown {
