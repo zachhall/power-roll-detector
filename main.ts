@@ -1,108 +1,209 @@
-import { MarkdownPostProcessorContext, Notice, Plugin } from "obsidian";
+import { MarkdownPostProcessorContext, Notice, Plugin, WorkspaceLeaf } from "obsidian";
+import { PowerRollView, VIEW_TYPE_POWER_ROLL } from "./view";
+import {
+	RollHistoryEntry,
+	RollMode,
+	makeEntryId,
+	modeLabel,
+	rollPowerRoll,
+	rollSavingThrow as rollSavingThrowResult,
+	tierLabel,
+} from "./rolls";
 
 const POWER_ROLL_PATTERN = /Power Roll\s*\+\s*(-?\d+)/gi;
 const SKIP_PARENT_SELECTOR =
 	"code, pre, a, button, input, textarea, select, .power-roll-inline";
+const FEATURE_CONTAINER_SELECTOR = ".ds-feature-container";
+const FEATURE_NAME_SELECTOR = ".ds-feature-name-value";
+const HISTORY_LIMIT = 20;
 
-function rollDie(): number {
-	return Math.floor(Math.random() * 10) + 1;
-}
-
-function tierFor(total: number): string {
-	if (total <= 11) return "Tier 1: ≤11";
-	if (total <= 16) return "Tier 2: 12-16";
-	return "Tier 3: 17+";
-}
-
-function handleRoll(span: HTMLElement) {
-	const modifier = Number(span.dataset.modifier);
-	const dieA = rollDie();
-	const dieB = rollDie();
-	const total = dieA + dieB + modifier;
-	const sign = modifier >= 0 ? "+" : "";
-	new Notice(
-		`${span.textContent} → 🎲 ${dieA} + ${dieB} ${sign}${modifier} = ${total} (${tierFor(total)})`,
-		6000
-	);
-}
-
-function processNode(root: HTMLElement) {
-	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-		acceptNode: (node) => {
-			const parent = node.parentElement;
-			if (!parent) return NodeFilter.FILTER_REJECT;
-			if (parent.closest(SKIP_PARENT_SELECTOR)) {
-				return NodeFilter.FILTER_REJECT;
-			}
-			return NodeFilter.FILTER_ACCEPT;
-		},
-	});
-
-	const targets: Text[] = [];
-	let current: Node | null;
-	while ((current = walker.nextNode())) {
-		const text = current.textContent ?? "";
-		POWER_ROLL_PATTERN.lastIndex = 0;
-		if (POWER_ROLL_PATTERN.test(text)) {
-			targets.push(current as Text);
-		}
-	}
-
-	for (const textNode of targets) {
-		splitAndWrap(textNode);
-	}
-}
-
-function splitAndWrap(textNode: Text) {
-	const text = textNode.textContent ?? "";
-	POWER_ROLL_PATTERN.lastIndex = 0;
-
-	const fragment = document.createDocumentFragment();
-	let lastIndex = 0;
-	let match: RegExpExecArray | null;
-
-	while ((match = POWER_ROLL_PATTERN.exec(text))) {
-		const [fullMatch, modifier] = match;
-		const start = match.index;
-
-		if (start > lastIndex) {
-			fragment.appendChild(
-				document.createTextNode(text.slice(lastIndex, start))
-			);
-		}
-
-		const span = document.createElement("span");
-		span.addClass("power-roll-inline");
-		span.setAttr("role", "button");
-		span.setAttr("tabindex", "0");
-		span.setAttr("aria-label", `Roll ${fullMatch}`);
-		span.dataset.modifier = modifier;
-		span.setText(fullMatch);
-		span.addEventListener("click", () => handleRoll(span));
-		span.addEventListener("keydown", (evt: KeyboardEvent) => {
-			if (evt.key === "Enter" || evt.key === " ") {
-				evt.preventDefault();
-				handleRoll(span);
-			}
-		});
-		fragment.appendChild(span);
-
-		lastIndex = start + fullMatch.length;
-	}
-
-	if (lastIndex < text.length) {
-		fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-	}
-
-	textNode.replaceWith(fragment);
+interface PluginData {
+	history: RollHistoryEntry[];
 }
 
 export default class PowerRollDetectorPlugin extends Plugin {
+	rollMode: RollMode = "none";
+	history: RollHistoryEntry[] = [];
+
 	async onload() {
+		const data = (await this.loadData()) as PluginData | null;
+		this.history = data?.history ?? [];
+
+		this.registerView(VIEW_TYPE_POWER_ROLL, (leaf) => new PowerRollView(leaf, this));
+
+		this.addRibbonIcon("dice", "Open Power Roll history", () => {
+			this.activateView();
+		});
+
+		this.addCommand({
+			id: "open-power-roll-history",
+			name: "Open Power Roll history",
+			callback: () => this.activateView(),
+		});
+
 		this.registerMarkdownPostProcessor(
 			(el: HTMLElement, _ctx: MarkdownPostProcessorContext) => {
-				processNode(el);
+				this.processNode(el);
 			}
 		);
+	}
+
+	async activateView() {
+		let leaf: WorkspaceLeaf | null = this.app.workspace.getLeavesOfType(VIEW_TYPE_POWER_ROLL)[0];
+		if (!leaf) {
+			leaf = this.app.workspace.getRightLeaf(false) ?? this.app.workspace.getLeaf("split");
+			await leaf.setViewState({ type: VIEW_TYPE_POWER_ROLL, active: true });
+		}
+		await this.app.workspace.revealLeaf(leaf);
+	}
+
+	setRollMode(mode: RollMode) {
+		this.rollMode = this.rollMode === mode ? "none" : mode;
+		this.refreshView();
+	}
+
+	private async pushHistory(entry: RollHistoryEntry) {
+		this.history = [entry, ...this.history].slice(0, HISTORY_LIMIT);
+		await this.saveData({ history: this.history } satisfies PluginData);
+		this.refreshView();
+	}
+
+	private refreshView() {
+		for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_POWER_ROLL)) {
+			if (leaf.view instanceof PowerRollView) {
+				leaf.view.render();
+			}
+		}
+	}
+
+	async rollSavingThrow() {
+		const result = rollSavingThrowResult();
+		const entry: RollHistoryEntry = {
+			id: makeEntryId(),
+			timestamp: Date.now(),
+			kind: "saving-throw",
+			label: null,
+			formulaText: "Saving Throw",
+			mode: null,
+			dieA: result.die,
+			dieB: null,
+			modifier: null,
+			total: result.die,
+			tier: null,
+			success: result.success,
+		};
+		await this.pushHistory(entry);
+		new Notice(`Saving Throw → 🎲 ${result.die} (${result.success ? "Success" : "Failure"})`, 6000);
+	}
+
+	private extractFeatureLabel(span: HTMLElement): string | null {
+		const container = span.closest(FEATURE_CONTAINER_SELECTOR);
+		const nameEl = container?.querySelector(FEATURE_NAME_SELECTOR);
+		const text = nameEl?.textContent?.trim();
+		return text ? text : null;
+	}
+
+	private async handlePowerRoll(span: HTMLElement) {
+		const modifier = Number(span.dataset.modifier);
+		const mode = this.rollMode;
+		const result = rollPowerRoll(modifier, mode);
+		const label = this.extractFeatureLabel(span);
+
+		const entry: RollHistoryEntry = {
+			id: makeEntryId(),
+			timestamp: Date.now(),
+			kind: "power-roll",
+			label,
+			formulaText: span.textContent ?? "Power Roll",
+			mode,
+			dieA: result.dieA,
+			dieB: result.dieB,
+			modifier,
+			total: result.total,
+			tier: result.tier,
+			success: null,
+		};
+
+		if (mode !== "none") {
+			this.rollMode = "none";
+		}
+
+		await this.pushHistory(entry);
+
+		const modeSuffix = mode !== "none" ? ` (${modeLabel(mode)})` : "";
+		const sign = modifier >= 0 ? "+" : "";
+		new Notice(
+			`${entry.formulaText}${modeSuffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${modifier} = ${result.total} (${tierLabel(result.tier)})`,
+			6000
+		);
+	}
+
+	private processNode(root: HTMLElement) {
+		const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+			acceptNode: (node) => {
+				const parent = node.parentElement;
+				if (!parent) return NodeFilter.FILTER_REJECT;
+				if (parent.closest(SKIP_PARENT_SELECTOR)) {
+					return NodeFilter.FILTER_REJECT;
+				}
+				return NodeFilter.FILTER_ACCEPT;
+			},
+		});
+
+		const targets: Text[] = [];
+		let current: Node | null;
+		while ((current = walker.nextNode())) {
+			const text = current.textContent ?? "";
+			POWER_ROLL_PATTERN.lastIndex = 0;
+			if (POWER_ROLL_PATTERN.test(text)) {
+				targets.push(current as Text);
+			}
+		}
+
+		for (const textNode of targets) {
+			this.splitAndWrap(textNode);
+		}
+	}
+
+	private splitAndWrap(textNode: Text) {
+		const text = textNode.textContent ?? "";
+		POWER_ROLL_PATTERN.lastIndex = 0;
+
+		const fragment = document.createDocumentFragment();
+		let lastIndex = 0;
+		let match: RegExpExecArray | null;
+
+		while ((match = POWER_ROLL_PATTERN.exec(text))) {
+			const [fullMatch, modifier] = match;
+			const start = match.index;
+
+			if (start > lastIndex) {
+				fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+			}
+
+			const span = document.createElement("span");
+			span.addClass("power-roll-inline");
+			span.setAttr("role", "button");
+			span.setAttr("tabindex", "0");
+			span.setAttr("aria-label", `Roll ${fullMatch}`);
+			span.dataset.modifier = modifier;
+			span.setText(fullMatch);
+			span.addEventListener("click", () => this.handlePowerRoll(span));
+			span.addEventListener("keydown", (evt: KeyboardEvent) => {
+				if (evt.key === "Enter" || evt.key === " ") {
+					evt.preventDefault();
+					this.handlePowerRoll(span);
+				}
+			});
+			fragment.appendChild(span);
+
+			lastIndex = start + fullMatch.length;
+		}
+
+		if (lastIndex < text.length) {
+			fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+		}
+
+		textNode.replaceWith(fragment);
 	}
 }
