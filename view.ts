@@ -61,6 +61,26 @@ export class PowerRollView extends ItemView {
 			}
 		}
 
+		const testRow = contentEl.createDiv({ cls: "prd-test-row" });
+		const testInput = testRow.createEl("input", {
+			type: "number",
+			cls: "prd-test-input",
+			attr: { placeholder: "0", "aria-label": "Test modifier" },
+		});
+		testInput.value = this.plugin.testModifierInput;
+		testInput.addEventListener("input", () => {
+			this.plugin.setTestModifierInput(testInput.value);
+		});
+		const testButton = testRow.createEl("button", {
+			text: "Roll a Test",
+			cls: "prd-test-button",
+		});
+		testButton.addEventListener("click", () => {
+			this.plugin.rollTest();
+		});
+
+		contentEl.createDiv({ cls: "prd-divider" });
+
 		const savingThrowButton = contentEl.createEl("button", {
 			text: "Roll a Saving Throw",
 			cls: "prd-saving-throw-button",
@@ -99,7 +119,7 @@ export class PowerRollView extends ItemView {
 		const resultRow = row.createDiv({ cls: "prd-result-row" });
 		const breakdown = row.createDiv({ cls: "prd-history-breakdown" });
 
-		if (entry.kind === "power-roll") {
+		if (entry.kind === "power-roll" || entry.kind === "test") {
 			resultRow.createSpan({ text: String(entry.total), cls: "prd-result-total" });
 			if (entry.tier) {
 				resultRow.createSpan({

@@ -38,6 +38,27 @@
 	color: var(--text-on-accent);
 }
 
+.prd-test-row {
+	display: flex;
+	gap: var(--size-2-2);
+	margin-bottom: var(--size-4-2);
+}
+
+.prd-test-input {
+	width: 4.5em;
+	flex: 0 0 auto;
+	text-align: center;
+}
+
+.prd-test-button {
+	flex: 1 1 auto;
+}
+
+.prd-divider {
+	border-top: 1px solid var(--background-modifier-border);
+	margin: 0 0 var(--size-4-3);
+}
+
 .prd-saving-throw-button {
 	width: 100%;
 	margin-bottom: var(--size-4-3);

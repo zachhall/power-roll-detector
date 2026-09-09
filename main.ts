@@ -26,6 +26,7 @@ interface PluginData {
 export default class PowerRollDetectorPlugin extends Plugin {
 	rollMode: RollMode = "none";
 	history: RollHistoryEntry[] = [];
+	testModifierInput = "";
 
 	async onload() {
 		const data = (await this.loadData()) as PluginData | null;
@@ -76,6 +77,45 @@ export default class PowerRollDetectorPlugin extends Plugin {
 				leaf.view.render();
 			}
 		}
+	}
+
+	setTestModifierInput(value: string) {
+		this.testModifierInput = value;
+	}
+
+	async rollTest() {
+		const modifier = Number(this.testModifierInput) || 0;
+		const mode = this.rollMode;
+		const result = rollPowerRoll(modifier, mode);
+
+		const entry: RollHistoryEntry = {
+			id: makeEntryId(),
+			timestamp: Date.now(),
+			kind: "test",
+			label: null,
+			creatureLabel: null,
+			formulaText: "Test",
+			mode,
+			dieA: result.dieA,
+			dieB: result.dieB,
+			modifier,
+			total: result.total,
+			tier: result.tier,
+			success: null,
+		};
+
+		if (mode !== "none") {
+			this.rollMode = "none";
+		}
+
+		await this.pushHistory(entry);
+
+		const modeSuffix = mode !== "none" ? ` (${modeLabel(mode)})` : "";
+		const sign = modifier >= 0 ? "+ " : "- ";
+		new Notice(
+			`Test${modeSuffix} → 🎲 ${result.dieA} + ${result.dieB} ${sign}${Math.abs(modifier)} = ${result.total} (${tierLabel(result.tier)})`,
+			6000
+		);
 	}
 
 	async rollSavingThrow() {

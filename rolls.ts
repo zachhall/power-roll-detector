@@ -5,7 +5,7 @@ export type Tier = 1 | 2 | 3;
 export interface RollHistoryEntry {
 	id: string;
 	timestamp: number;
-	kind: "power-roll" | "saving-throw";
+	kind: "power-roll" | "test" | "saving-throw";
 	label: string | null;
 	creatureLabel: string | null;
 	formulaText: string;
