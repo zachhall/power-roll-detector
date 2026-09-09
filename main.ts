@@ -15,6 +15,8 @@ const SKIP_PARENT_SELECTOR =
 	"code, pre, a, button, input, textarea, select, .power-roll-inline";
 const FEATURE_CONTAINER_SELECTOR = ".ds-feature-container";
 const FEATURE_NAME_SELECTOR = ".ds-feature-name-value";
+const CREATURE_CONTAINER_SELECTOR = ".ds-sb-container";
+const CREATURE_NAME_SELECTOR = ".ds-header-title-left";
 const HISTORY_LIMIT = 20;
 
 interface PluginData {
@@ -42,8 +44,8 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		});
 
 		this.registerMarkdownPostProcessor(
-			(el: HTMLElement, _ctx: MarkdownPostProcessorContext) => {
-				this.processNode(el);
+			(el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+				this.processNode(el, ctx.sourcePath);
 			}
 		);
 	}
@@ -83,6 +85,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			timestamp: Date.now(),
 			kind: "saving-throw",
 			label: null,
+			creatureLabel: null,
 			formulaText: "Saving Throw",
 			mode: null,
 			dieA: result.die,
@@ -103,17 +106,34 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		return text ? text : null;
 	}
 
+	private fileTitleFromPath(sourcePath: string | undefined): string | null {
+		if (!sourcePath) return null;
+		const segment = sourcePath.split("/").pop() ?? sourcePath;
+		const title = segment.replace(/\.md$/i, "").trim();
+		return title ? title : null;
+	}
+
+	private extractCreatureLabel(span: HTMLElement): string | null {
+		const container = span.closest(CREATURE_CONTAINER_SELECTOR);
+		const nameEl = container?.querySelector(CREATURE_NAME_SELECTOR);
+		const text = nameEl?.textContent?.trim();
+		if (text) return text;
+		return this.fileTitleFromPath(span.dataset.sourcePath);
+	}
+
 	private async handlePowerRoll(span: HTMLElement) {
 		const modifier = Number(span.dataset.modifier);
 		const mode = this.rollMode;
 		const result = rollPowerRoll(modifier, mode);
 		const label = this.extractFeatureLabel(span);
+		const creatureLabel = this.extractCreatureLabel(span);
 
 		const entry: RollHistoryEntry = {
 			id: makeEntryId(),
 			timestamp: Date.now(),
 			kind: "power-roll",
 			label,
+			creatureLabel,
 			formulaText: span.textContent ?? "Power Roll",
 			mode,
 			dieA: result.dieA,
@@ -138,7 +158,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		);
 	}
 
-	private processNode(root: HTMLElement) {
+	private processNode(root: HTMLElement, sourcePath: string) {
 		const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
 			acceptNode: (node) => {
 				const parent = node.parentElement;
@@ -161,11 +181,11 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		}
 
 		for (const textNode of targets) {
-			this.splitAndWrap(textNode);
+			this.splitAndWrap(textNode, sourcePath);
 		}
 	}
 
-	private splitAndWrap(textNode: Text) {
+	private splitAndWrap(textNode: Text, sourcePath: string) {
 		const text = textNode.textContent ?? "";
 		POWER_ROLL_PATTERN.lastIndex = 0;
 
@@ -187,6 +207,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			span.setAttr("tabindex", "0");
 			span.setAttr("aria-label", `Roll ${fullMatch}`);
 			span.dataset.modifier = modifier;
+			span.dataset.sourcePath = sourcePath;
 			span.setText(fullMatch);
 			span.addEventListener("click", () => this.handlePowerRoll(span));
 			span.addEventListener("keydown", (evt: KeyboardEvent) => {

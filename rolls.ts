@@ -7,6 +7,7 @@ export interface RollHistoryEntry {
 	timestamp: number;
 	kind: "power-roll" | "saving-throw";
 	label: string | null;
+	creatureLabel: string | null;
 	formulaText: string;
 	mode: RollMode | null;
 	dieA: number;

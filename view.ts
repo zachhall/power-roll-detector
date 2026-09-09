@@ -88,6 +88,10 @@ export class PowerRollView extends ItemView {
 		const row = document.createElement("div");
 		row.addClass("prd-history-entry");
 
+		if (entry.creatureLabel) {
+			row.createDiv({ text: entry.creatureLabel, cls: "prd-history-creature" });
+		}
+
 		if (entry.label) {
 			row.createDiv({ text: entry.label, cls: "prd-history-label" });
 		}
