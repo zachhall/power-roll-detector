@@ -60,16 +60,45 @@
 	margin-bottom: var(--size-2-1);
 }
 
-.prd-history-line {
+.prd-result-row {
+	display: flex;
+	align-items: baseline;
+	gap: var(--size-4-2);
+	margin-bottom: var(--size-2-1);
+}
+
+.prd-result-total {
+	font-size: var(--font-ui-larger);
+	font-weight: 700;
+	line-height: 1;
+}
+
+.prd-tier-badge {
+	font-size: var(--font-ui-smaller);
+	font-weight: 600;
+	padding: var(--size-2-1) var(--size-2-2);
+	border-radius: 999px;
+	white-space: nowrap;
+	color: var(--text-on-accent);
+}
+
+.prd-tier-badge.prd-tier-1,
+.prd-tier-badge.prd-failure {
+	background-color: var(--color-red);
+}
+
+.prd-tier-badge.prd-tier-2 {
+	background-color: var(--color-orange);
+}
+
+.prd-tier-badge.prd-tier-3,
+.prd-tier-badge.prd-success {
+	background-color: var(--color-green);
+}
+
+.prd-history-breakdown {
+	color: var(--text-muted);
 	font-size: var(--font-ui-small);
-}
-
-.prd-history-success {
-	color: var(--color-green);
-}
-
-.prd-history-failure {
-	color: var(--color-red);
 }
 
 .prd-history-time {

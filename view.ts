@@ -85,23 +85,32 @@ export class PowerRollView extends ItemView {
 			row.createDiv({ text: entry.label, cls: "prd-history-label" });
 		}
 
-		const line = row.createDiv({ cls: "prd-history-line" });
+		const resultRow = row.createDiv({ cls: "prd-result-row" });
+		const breakdown = row.createDiv({ cls: "prd-history-breakdown" });
 
 		if (entry.kind === "power-roll") {
+			resultRow.createSpan({ text: String(entry.total), cls: "prd-result-total" });
+			if (entry.tier) {
+				resultRow.createSpan({
+					text: tierLabel(entry.tier),
+					cls: `prd-tier-badge prd-tier-${entry.tier}`,
+				});
+			}
+
 			const modeSuffix = entry.mode && entry.mode !== "none" ? ` (${modeLabel(entry.mode)})` : "";
 			const dice = `🎲 ${entry.dieA} + ${entry.dieB}`;
 			const modifierText =
 				entry.modifier !== null
 					? ` ${entry.modifier >= 0 ? "+ " : "- "}${Math.abs(entry.modifier)}`
 					: "";
-			line.setText(
-				`${entry.formulaText}${modeSuffix}: ${dice}${modifierText} = ${entry.total} — ${
-					entry.tier ? tierLabel(entry.tier) : ""
-				}`
-			);
+			breakdown.setText(`${entry.formulaText}${modeSuffix}: ${dice}${modifierText}`);
 		} else {
-			line.setText(`Saving Throw: 🎲 ${entry.dieA} — ${entry.success ? "Success" : "Failure"}`);
-			line.addClass(entry.success ? "prd-history-success" : "prd-history-failure");
+			resultRow.createSpan({ text: String(entry.dieA), cls: "prd-result-total" });
+			resultRow.createSpan({
+				text: entry.success ? "Success" : "Failure",
+				cls: `prd-tier-badge ${entry.success ? "prd-success" : "prd-failure"}`,
+			});
+			breakdown.setText("Saving Throw");
 		}
 
 		row.createDiv({
