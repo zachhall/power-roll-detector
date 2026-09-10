@@ -4,6 +4,6 @@
 	"version": "1.2.0",
 	"minAppVersion": "1.0.2",
 	"description": "Detects \"Power Roll + N\" text in Draw Steel statblocks and turns it into a clickable 2d10+N roller.",
-	"author": "hello@zhall.me",
+	"author": "zachhall",
 	"isDesktopOnly": false
 }
