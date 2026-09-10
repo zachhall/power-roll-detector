@@ -54,13 +54,20 @@ Draw Steel's shorthand.
 
 ## Installation
 
-### Recommended: BRAT
+### Community plugin directory
 
-1. Install and enable the **BRAT** community plugin (Settings → Community plugins → Browse).
-2. Run **BRAT: Add a beta plugin for testing** and add this repo: `zachhall/power-roll-detector`.
-3. BRAT downloads `main.js`, `manifest.json`, and `styles.css` from the latest
-   [release](../../releases) and enables the plugin. Run **BRAT: Check for
-   updates to all beta plugins** to pull in future releases.
+1. Settings → Community plugins → **Browse**.
+2. Search for **Power Roll Detector**, install, and enable it.
+
+Or open [this link](https://obsidian.md/plugins?id=power-roll-detector) to jump
+straight to it in Obsidian. Directory listing:
+<https://community.obsidian.md/plugins/power-roll-detector>.
+
+### Beta releases via BRAT
+
+To track pre-release builds ahead of the directory, use
+[BRAT](https://github.com/TfTHacker/obsidian42-brat): run **BRAT: Add a beta
+plugin for testing** and add `zachhall/power-roll-detector`.
 
 ### Manual installation
 
