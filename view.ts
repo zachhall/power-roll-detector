@@ -138,8 +138,7 @@ export class PowerRollView extends ItemView {
 	}
 
 	private buildHistoryRow(entry: RollHistoryEntry): HTMLElement {
-		const row = document.createElement("div");
-		row.addClass("prd-history-entry");
+		const row = createDiv({ cls: "prd-history-entry" });
 		if (isNaturalCrit(entry)) {
 			row.addClass("prd-history-natural");
 		}

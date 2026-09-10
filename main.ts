@@ -254,43 +254,46 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		const text = textNode.textContent ?? "";
 		POWER_ROLL_PATTERN.lastIndex = 0;
 
-		const fragment = document.createDocumentFragment();
-		let lastIndex = 0;
-		let match: RegExpExecArray | null;
+		const fragment = createFragment((frag) => {
+			let lastIndex = 0;
+			let match: RegExpExecArray | null;
 
-		while ((match = POWER_ROLL_PATTERN.exec(text))) {
-			const [fullMatch, modifier] = match;
-			const start = match.index;
+			while ((match = POWER_ROLL_PATTERN.exec(text))) {
+				const [fullMatch, modifier] = match;
+				const start = match.index;
 
-			if (start > lastIndex) {
-				fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+				if (start > lastIndex) {
+					frag.appendText(text.slice(lastIndex, start));
+				}
+
+				const span = frag.createSpan({
+					cls: "power-roll-inline",
+					text: fullMatch,
+					attr: {
+						role: "button",
+						tabindex: "0",
+						"aria-label": `Roll ${fullMatch}`,
+						"data-modifier": modifier,
+						"data-source-path": sourcePath,
+					},
+				});
+				span.addEventListener("click", () => {
+					this.handlePowerRoll(span).catch(reportError("power roll"));
+				});
+				span.addEventListener("keydown", (evt: KeyboardEvent) => {
+					if (evt.key === "Enter" || evt.key === " ") {
+						evt.preventDefault();
+						this.handlePowerRoll(span).catch(reportError("power roll"));
+					}
+				});
+
+				lastIndex = start + fullMatch.length;
 			}
 
-			const span = document.createElement("span");
-			span.addClass("power-roll-inline");
-			span.setAttr("role", "button");
-			span.setAttr("tabindex", "0");
-			span.setAttr("aria-label", `Roll ${fullMatch}`);
-			span.dataset.modifier = modifier;
-			span.dataset.sourcePath = sourcePath;
-			span.setText(fullMatch);
-			span.addEventListener("click", () => {
-				this.handlePowerRoll(span).catch(reportError("power roll"));
-			});
-			span.addEventListener("keydown", (evt: KeyboardEvent) => {
-				if (evt.key === "Enter" || evt.key === " ") {
-					evt.preventDefault();
-					this.handlePowerRoll(span).catch(reportError("power roll"));
-				}
-			});
-			fragment.appendChild(span);
-
-			lastIndex = start + fullMatch.length;
-		}
-
-		if (lastIndex < text.length) {
-			fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-		}
+			if (lastIndex < text.length) {
+				frag.appendText(text.slice(lastIndex));
+			}
+		});
 
 		textNode.replaceWith(fragment);
 	}
