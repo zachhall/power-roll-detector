@@ -20,6 +20,10 @@ const CREATURE_CONTAINER_SELECTOR = ".ds-sb-container";
 const CREATURE_NAME_SELECTOR = ".ds-header-title-left";
 const HISTORY_LIMIT = 20;
 
+export function reportError(context: string): (err: unknown) => void {
+	return (err: unknown) => console.error(`Power Roll Detector: ${context} failed`, err);
+}
+
 interface PluginData {
 	history: RollHistoryEntry[];
 }
@@ -37,13 +41,15 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		this.registerView(VIEW_TYPE_POWER_ROLL, (leaf) => new PowerRollView(leaf, this));
 
 		this.addRibbonIcon("dice", "Open Power Roll history", () => {
-			this.activateView();
+			this.activateView().catch(reportError("open history view"));
 		});
 
 		this.addCommand({
 			id: "open-power-roll-history",
 			name: "Open Power Roll history",
-			callback: () => this.activateView(),
+			callback: () => {
+				this.activateView().catch(reportError("open history view"));
+			},
 		});
 
 		this.registerMarkdownPostProcessor(
@@ -268,11 +274,13 @@ export default class PowerRollDetectorPlugin extends Plugin {
 			span.dataset.modifier = modifier;
 			span.dataset.sourcePath = sourcePath;
 			span.setText(fullMatch);
-			span.addEventListener("click", () => this.handlePowerRoll(span));
+			span.addEventListener("click", () => {
+				this.handlePowerRoll(span).catch(reportError("power roll"));
+			});
 			span.addEventListener("keydown", (evt: KeyboardEvent) => {
 				if (evt.key === "Enter" || evt.key === " ") {
 					evt.preventDefault();
-					this.handlePowerRoll(span);
+					this.handlePowerRoll(span).catch(reportError("power roll"));
 				}
 			});
 			fragment.appendChild(span);

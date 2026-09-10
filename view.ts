@@ -1,5 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import type PowerRollDetectorPlugin from "./main";
+import { reportError } from "./main";
 import { RollHistoryEntry, RollMode, isNaturalCrit, rollBreakdown, rollSuffix, tierLabel } from "./rolls";
 
 export const VIEW_TYPE_POWER_ROLL = "power-roll-history-view";
@@ -97,7 +98,7 @@ export class PowerRollView extends ItemView {
 			cls: "prd-test-button",
 		});
 		testButton.addEventListener("click", () => {
-			this.plugin.rollTest();
+			this.plugin.rollTest().catch(reportError("roll test"));
 		});
 
 		const skillButton = testRow.createEl("button", {
@@ -118,7 +119,7 @@ export class PowerRollView extends ItemView {
 			cls: "prd-saving-throw-button",
 		});
 		savingThrowButton.addEventListener("click", () => {
-			this.plugin.rollSavingThrow();
+			this.plugin.rollSavingThrow().catch(reportError("roll saving throw"));
 		});
 
 		const historyEl = contentEl.createDiv({ cls: "prd-history" });
