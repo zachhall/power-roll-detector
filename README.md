@@ -81,6 +81,7 @@ plugin for testing** and add `zachhall/power-roll-detector`.
 npm install
 npm run dev    # watch build
 npm run build  # production build
+npm test       # Obsidian community-directory compliance checks (tests/)
 ```
 
 `esbuild.config.mjs` writes `main.js` into this folder, so if the repo lives in
