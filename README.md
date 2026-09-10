@@ -15,7 +15,7 @@ Draw Steel's shorthand.
 
 ## Prerequisites
 
-- **Obsidian ≥ 1.5.0**
+- **Obsidian ≥ 1.7.2**
 - **[Draw Steel Elements](https://github.com/SteelCompendium/obsidian-draw-steel-elements)**
   — not required for detection (any plain "Power Roll + N" text is wrapped), but
   it's what renders statblock roll fields into notes, and the ability-name /
