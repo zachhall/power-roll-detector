@@ -2,6 +2,7 @@
 	cursor: pointer;
 	border-radius: 4px;
 	padding: 0 2px;
+	background-color: var(--background-primary-alt);
 	text-decoration: underline dotted;
 	text-decoration-color: var(--text-accent);
 	transition: background-color 0.1s ease-in-out;
