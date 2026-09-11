@@ -4,19 +4,19 @@ Obsidian plugin for [Draw Steel](https://www.mcdmproductions.com/draw-steel).
 It scans rendered notes for the text **"Power Roll + N"** and turns each match
 into a clickable inline `2d10 + N` roller — no change to how your statblocks are
 written. Built for use alongside
-[Draw Steel Elements](https://github.com/SteelCompendium/obsidian-draw-steel-elements),
+[Draw Steel Elements](https://github.com/SteelCompendium/draw-steel-elements),
 which renders `roll: Power Roll + N` statblock fields into plain text in Reading
 view.
 
 Independently written, but built on the same technique as
-[RPG Detect Dice Roll](https://www.solorpgstudio.com) (`registerMarkdownPostProcessor`
+[RPG Detect Dice Roll](https://github.com/solorpgstudio/obsidian-rpg-detect-dice-roll) (`registerMarkdownPostProcessor`
 + `TreeWalker` text scanning), which handles literal `2d10+3` notation but not
 Draw Steel's shorthand.
 
 ## Prerequisites
 
 - **Obsidian ≥ 1.7.2**
-- **[Draw Steel Elements](https://github.com/SteelCompendium/obsidian-draw-steel-elements)**
+- **[Draw Steel Elements](https://github.com/SteelCompendium/draw-steel-elements)**
   — not required for detection (any plain "Power Roll + N" text is wrapped), but
   it's what renders statblock roll fields into notes, and the ability-name /
   monster-name context in roll history relies on its DOM structure
