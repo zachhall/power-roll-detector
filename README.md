@@ -30,7 +30,8 @@ Draw Steel's shorthand.
   like `Power Roll + Reason, Intuition, or Presence` are left alone.
 - Click (or focus + Enter/Space) to roll **2d10 + N**: two independent d10s,
   classified into Draw Steel's tiers (≤11 / 12–16 / 17+), shown in a toast with
-  every term broken out.
+  every term broken out. Also opens the Power Roll sidebar so the roll lands in
+  history — configurable, see Settings.
 - Rolls inside a Draw Steel Elements block also capture the ability name and the
   containing monster/character name for the history log.
 - **Power Roll sidebar** (ribbon icon 🎲, "Open Power Roll history"):
@@ -48,7 +49,7 @@ Draw Steel's shorthand.
 ## Limitations
 
 - Reading view only — no Live Preview / editing-mode detection.
-- No settings pane; history limit, tier bands, and badge colors are fixed.
+- History limit, tier bands, and badge colors are fixed — not configurable.
 - No difficulty selector for Tests — the raw total and tier are shown for you to
   read against whatever table applies.
 
@@ -74,6 +75,15 @@ plugin for testing** and add `zachhall/power-roll-detector`.
 1. Download `main.js`, `manifest.json`, and `styles.css` from a [release](../../releases).
 2. Copy them into `<your vault>/.obsidian/plugins/power-roll-detector/`.
 3. Reload Obsidian and enable **Power Roll Detector** under Settings → Community plugins.
+
+## Settings
+
+- **Sidebar on power roll** — what an inline `Power Roll + N` click does to the
+  Power Roll sidebar. **Always open** (default) reveals it, creating it if
+  needed. **Only if already open** updates it without stealing focus/layout if
+  it isn't already visible. **Never** leaves it alone entirely — the roll still
+  logs to history and shows in the toast, just not reflected until you open the
+  sidebar yourself.
 
 ## Building from source
 

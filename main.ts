@@ -10,6 +10,7 @@ import {
 	rollSuffix,
 	tierLabel,
 } from "./rolls";
+import { DEFAULT_SIDEBAR_OPEN_BEHAVIOR, PowerRollDetectorSettingTab, SidebarOpenBehavior } from "./settings";
 
 const POWER_ROLL_PATTERN = /Power Roll\s*\+\s*(-?\d+)/gi;
 const SKIP_PARENT_SELECTOR =
@@ -26,6 +27,7 @@ export function reportError(context: string): (err: unknown) => void {
 
 interface PluginData {
 	history: RollHistoryEntry[];
+	sidebarOpenBehavior: SidebarOpenBehavior;
 }
 
 export default class PowerRollDetectorPlugin extends Plugin {
@@ -33,10 +35,12 @@ export default class PowerRollDetectorPlugin extends Plugin {
 	history: RollHistoryEntry[] = [];
 	testModifierInput = "";
 	skillEnabled = false;
+	sidebarOpenBehavior: SidebarOpenBehavior = DEFAULT_SIDEBAR_OPEN_BEHAVIOR;
 
 	async onload() {
-		const data = (await this.loadData()) as PluginData | null;
+		const data = (await this.loadData()) as Partial<PluginData> | null;
 		this.history = data?.history ?? [];
+		this.sidebarOpenBehavior = data?.sidebarOpenBehavior ?? DEFAULT_SIDEBAR_OPEN_BEHAVIOR;
 
 		this.registerView(VIEW_TYPE_POWER_ROLL, (leaf) => new PowerRollView(leaf, this));
 
@@ -51,6 +55,8 @@ export default class PowerRollDetectorPlugin extends Plugin {
 				this.activateView().catch(reportError("open history view"));
 			},
 		});
+
+		this.addSettingTab(new PowerRollDetectorSettingTab(this.app, this));
 
 		this.registerMarkdownPostProcessor(
 			(el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
@@ -75,8 +81,32 @@ export default class PowerRollDetectorPlugin extends Plugin {
 
 	private async pushHistory(entry: RollHistoryEntry) {
 		this.history = [entry, ...this.history].slice(0, HISTORY_LIMIT);
-		await this.saveData({ history: this.history } satisfies PluginData);
+		await this.persistData();
 		this.refreshView();
+	}
+
+	async saveSettings() {
+		await this.persistData();
+	}
+
+	private async persistData() {
+		await this.saveData({
+			history: this.history,
+			sidebarOpenBehavior: this.sidebarOpenBehavior,
+		} satisfies PluginData);
+	}
+
+	/** Reveals the Power Roll sidebar after an inline roll, per the "Sidebar on power roll" setting. */
+	private async revealSidebarForRoll() {
+		if (this.sidebarOpenBehavior === "never") return;
+
+		if (this.sidebarOpenBehavior === "ifOpen") {
+			const existingLeaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_POWER_ROLL)[0];
+			if (existingLeaf) await this.app.workspace.revealLeaf(existingLeaf);
+			return;
+		}
+
+		await this.activateView();
 	}
 
 	private refreshView() {
@@ -215,6 +245,7 @@ export default class PowerRollDetectorPlugin extends Plugin {
 		}
 
 		await this.pushHistory(entry);
+		await this.revealSidebarForRoll();
 
 		const suffix = rollSuffix(mode, false);
 		new Notice(
