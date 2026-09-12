@@ -94,7 +94,7 @@ export class PowerRollView extends ItemView {
 		});
 
 		const testButton = testRow.createEl("button", {
-			text: "Roll a Test",
+			text: "Roll a test",
 			cls: "prd-test-button",
 		});
 		testButton.addEventListener("click", () => {
@@ -102,7 +102,7 @@ export class PowerRollView extends ItemView {
 		});
 
 		const skillButton = testRow.createEl("button", {
-			text: "Use Skill",
+			text: "Use skill",
 			cls: "prd-skill-button",
 		});
 		if (this.plugin.skillEnabled) {

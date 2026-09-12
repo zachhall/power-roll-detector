@@ -37,9 +37,9 @@ Draw Steel's shorthand.
   - **Edge / Bane toggles** — arm one for the *next* Power Roll or Test only,
     then it auto-clears. Edge +2, Bane −2; Double Edge/Bane shift the tier by one
     instead of a number.
-  - **Roll a Test** — `2d10 + N` for characteristic/skill checks; type the
+  - **Roll a test** — `2d10 + N` for characteristic/skill checks; type the
     modifier yourself. Respects the Edge/Bane toggle.
-  - **Use Skill** — flat +2 to the next Test, stacks with Edge/Bane.
+  - **Use skill** — flat +2 to the next Test, stacks with Edge/Bane.
   - **Roll a Saving Throw** — flat 1d10, success on 6+. Ignores all toggles.
   - **Roll history** — last 20 rolls, newest first, with tier badge, term-by-term
     breakdown, and timestamp. A natural 19–20 (before modifiers) gets a gold
@@ -81,6 +81,7 @@ plugin for testing** and add `zachhall/power-roll-detector`.
 npm install
 npm run dev    # watch build
 npm run build  # production build
+npm run lint   # eslint-plugin-obsidianmd (developer guideline checks)
 npm test       # Obsidian community-directory compliance checks (tests/)
 ```
 
