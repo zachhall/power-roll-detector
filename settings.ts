@@ -1,10 +1,17 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, SettingDefinitionItem } from "obsidian";
 import type PowerRollDetectorPlugin from "./main";
 
 export type SidebarOpenBehavior = "always" | "ifOpen" | "never";
 
 export const DEFAULT_SIDEBAR_OPEN_BEHAVIOR: SidebarOpenBehavior = "always";
 
+/**
+ * Settings tab rendering, via Obsidian's declarative settings API
+ * (getSettingDefinitions(), added in 1.13.0 -- this plugin's declared
+ * minAppVersion). `display()` -- the pre-1.13.0 imperative override -- is
+ * deliberately not implemented: every client that can run this plugin has
+ * the declarative API, so it would never be called.
+ */
 export class PowerRollDetectorSettingTab extends PluginSettingTab {
 	plugin: PowerRollDetectorPlugin;
 
@@ -13,11 +20,17 @@ export class PowerRollDetectorSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	display(): void {
-		const { containerEl } = this;
-		containerEl.empty();
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		return [
+			{
+				name: "Sidebar on power roll",
+				render: (setting) => this.renderSidebarOpenBehavior(setting),
+			},
+		];
+	}
 
-		new Setting(containerEl)
+	private renderSidebarOpenBehavior(setting: Setting): void {
+		setting
 			.setName("Sidebar on power roll")
 			.setDesc("What happens to the Power Roll sidebar when you click an inline Power Roll.")
 			.addDropdown((dropdown) =>
